@@ -55,6 +55,42 @@ Ouvre la solution / le projet `LeagueOfSmurfs` dans Visual Studio, restaure les 
 - Les comptes et secrets restent sur ta machine ; ce n’est **pas** un coffre-fort
 - Respecte les conditions d’utilisation de Riot Games ; ce repo n’est affilié à Riot d’aucune façon
 
+## Antivirus / faux positifs
+
+Windows Defender (et d’autres AV) peuvent **bloquer ou supprimer** `LeagueOfSmurfs.exe`.
+
+C’est **attendu** et en général un **faux positif**, parce que l’app fait des choses que les heuristiques associent souvent à du malware :
+
+- simulation clavier (`SendKeys`)
+- prise de focus d’une autre fenêtre
+- accès au presse-papiers
+- fermeture de processus Riot/League
+- exécutable **non signé**, téléchargé depuis internet
+
+Le code source est public dans ce dépôt : tu peux compiler toi-même depuis Visual Studio pour éviter le téléchargement d’un `.exe` prébuild.
+
+### Vérifier le zip de la release `v1.0.0`
+
+SHA256 de `LeagueOfSmurfs-v1.0.0-win-x86.zip` :
+
+```text
+22472FE0E627BDABE0331D14D84F9E866C849AC3F25F86ACF1316FF632BEC454
+```
+
+PowerShell :
+
+```powershell
+Get-FileHash .\LeagueOfSmurfs-v1.0.0-win-x86.zip -Algorithm SHA256
+```
+
+### Si Defender bloque le fichier
+
+1. Vérifie le hash ci-dessus
+2. Restaure le fichier depuis la protection Windows / quarantaine si besoin
+3. Ou compile depuis les sources (recommandé)
+
+Ne désactive pas Defender globalement juste pour ça.
+
 ## Licence / esprit du projet
 
 Projet perso, pour s’amuser et bricoler.  

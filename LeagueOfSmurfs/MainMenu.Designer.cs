@@ -137,7 +137,7 @@ namespace LeagueOfSmurfs
             this.apiKeyBox.BorderStyle = System.Windows.Forms.BorderStyle.None;
             this.apiKeyBox.ForeColor = System.Drawing.Color.White;
             this.apiKeyBox.Location = new System.Drawing.Point(324, 19);
-            this.apiKeyBox.MaxLength = 50;
+            this.apiKeyBox.MaxLength = 128;
             this.apiKeyBox.Name = "apiKeyBox";
             this.apiKeyBox.Size = new System.Drawing.Size(307, 13);
             this.apiKeyBox.TabIndex = 5;

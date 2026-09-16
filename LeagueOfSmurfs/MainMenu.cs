@@ -64,19 +64,20 @@ namespace LeagueOfSmurfs
         {
             this.api = null;
 
-            string candidate = this.apiKeyBox.Text;
-
-            // Only on first startup: restore the last saved key into the box
-            if (!this.apiKeyInitialized
-                && string.IsNullOrWhiteSpace(candidate)
-                && !string.IsNullOrWhiteSpace(this.confManager.apiKey))
+            // First startup: restore the last saved key into the box
+            if (!this.apiKeyInitialized)
             {
-                candidate = this.confManager.apiKey;
-                this.apiKeyBox.Text = candidate;
+                if (string.IsNullOrWhiteSpace(this.apiKeyBox.Text)
+                    && !string.IsNullOrWhiteSpace(this.confManager.apiKey))
+                {
+                    this.apiKeyBox.Text = this.confManager.apiKey.Trim();
+                }
+                this.apiKeyInitialized = true;
             }
-            this.apiKeyInitialized = true;
 
-            // Empty field = intentionally no API key (do not reload from disk)
+            string candidate = (this.apiKeyBox.Text ?? string.Empty).Trim();
+
+            // Empty field = user intentionally clears the key
             if (string.IsNullOrWhiteSpace(candidate))
             {
                 this.confManager.ClearApi();
@@ -86,21 +87,14 @@ namespace LeagueOfSmurfs
                 return;
             }
 
-            candidate = candidate.Trim();
+            // Always save what was entered (even if Riot validation fails temporarily)
+            this.confManager.apiKey = candidate;
+            this.confManager.SaveApi();
+            this.apiKeyBox.Text = candidate;
+
             Debug.WriteLine("Checking API Key: " + candidate);
             this.api = RiotUtils.checkAPI(candidate);
-
-            if (this.api != null)
-            {
-                this.confManager.apiKey = candidate;
-                this.confManager.SaveApi();
-                this.apiKeyBox.Text = candidate;
-            }
-            else
-            {
-                this.confManager.ClearApi();
-                this.apiKeyBox.Text = string.Empty;
-            }
+            // Keep saved key on invalid/offline — only clear when the field is emptied
 
             this.apiColor();
             this.updateDisplay();

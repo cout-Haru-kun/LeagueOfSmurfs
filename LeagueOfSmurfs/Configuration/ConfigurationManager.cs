@@ -121,13 +121,17 @@ namespace LeagueOfSmurfs.Configurations
         {
             string path = Path.Combine(dirPath, "api.key");
             if (File.Exists(path))
-                apiKey = File.ReadAllText(path);
+            {
+                apiKey = (File.ReadAllText(path) ?? string.Empty).Trim();
+                if (string.IsNullOrWhiteSpace(apiKey))
+                    apiKey = string.Empty;
+            }
         }
 
         public void SaveApi()
         {
             EnsureDirectory();
-            File.WriteAllText(Path.Combine(dirPath, "api.key"), this.apiKey ?? string.Empty);
+            File.WriteAllText(Path.Combine(dirPath, "api.key"), (this.apiKey ?? string.Empty).Trim());
         }
 
         public void ClearApi()

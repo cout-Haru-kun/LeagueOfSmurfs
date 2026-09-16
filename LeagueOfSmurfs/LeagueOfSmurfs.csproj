@@ -217,10 +217,12 @@
     <Compile Include="AccountDisplay.Designer.cs">
       <DependentUpon>AccountDisplay.cs</DependentUpon>
     </Compile>
+    <Compile Include="Configuration\AppTheme.cs" />
     <Compile Include="Configuration\ConfigurationManager.cs" />
     <Compile Include="Configuration\RankEnum.cs" />
     <Compile Include="Configuration\RegionEnum.cs" />
     <Compile Include="Configuration\SmurfsConfiguration.cs" />
+    <Compile Include="Configuration\ValorantRankEnum.cs" />
     <Compile Include="CustomForms\ErrorLabel.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -302,6 +304,7 @@
     <Compile Include="Utils\MouseUtils.cs" />
     <Compile Include="Utils\RankedUtils.cs" />
     <Compile Include="Utils\RiotUtils.cs" />
+    <Compile Include="Utils\ValorantUtils.cs" />
     <Compile Include="Utils\WindowUtils.cs" />
     <EmbeddedResource Include="AccountAdder.resx">
       <DependentUpon>AccountAdder.cs</DependentUpon>

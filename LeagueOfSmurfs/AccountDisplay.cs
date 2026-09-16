@@ -58,10 +58,61 @@ namespace LeagueOfSmurfs
             this.lastCheck = DateTime.Now;
             this.inGame = false;
 
-            // Remove button background (flemme de mettre les flat)
-            this.launchButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 40, 40);
-            this.editButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 40, 40);
-            this.deleteButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(40, 40, 40);
+            this.ApplyTheme();
+            this.ApplyModeLabels();
+        }
+
+        public void ApplyTheme()
+        {
+            this.BackColor = AppTheme.Card;
+            this.operationProcessBar.ForeColor = AppTheme.Accent;
+
+            Color secondary = AppTheme.SecondaryText;
+            this.regionLabel.ForeColor = secondary;
+            this.summonerNameLabel.ForeColor = secondary;
+            this.levelLabel.ForeColor = secondary;
+            this.flexLadderLabel.ForeColor = secondary;
+            this.flexLpLabel.ForeColor = secondary;
+            this.soloLadderLabel.ForeColor = secondary;
+            this.soloLpLabel.ForeColor = secondary;
+
+            Color hover = AppTheme.Hover;
+            this.launchButton.FlatAppearance.MouseOverBackColor = hover;
+            this.editButton.FlatAppearance.MouseOverBackColor = hover;
+            this.deleteButton.FlatAppearance.MouseOverBackColor = hover;
+
+            this.Invalidate();
+        }
+
+        public void ApplyModeLabels()
+        {
+            if (AppTheme.IsValorant)
+            {
+                this.summonerLabel.Text = "Agent";
+                this.flexLabel.Text = "Current";
+                this.soloLabel.Text = "Peak";
+                this.summonerNameLabel.Text = this.conf.summonerName;
+                this.regionLabel.Text = this.conf.region.ToString();
+                this.levelLabel.Text = "Level: " + this.conf.level;
+                this.flexLadderLabel.Text = "Rank: " + RankedUtils.valorantRankToString(this.conf.valRank);
+                this.flexLpLabel.Text = "RR: " + this.conf.valRR.ToString();
+                this.soloLadderLabel.Text = "Rank: " + RankedUtils.valorantRankToString(this.conf.valPeakRank);
+                this.soloLpLabel.Text = "";
+            }
+            else
+            {
+                this.summonerLabel.Text = "Summoner";
+                this.flexLabel.Text = "Flex";
+                this.soloLabel.Text = "Solo/Duo";
+                this.summonerNameLabel.Text = this.conf.summonerName;
+                this.regionLabel.Text = this.conf.region.ToString();
+                this.levelLabel.Text = "Level: " + this.conf.level;
+                this.flexLadderLabel.Text = "Ladder: " + RankedUtils.rankToString(this.conf.flexRank);
+                this.flexLpLabel.Text = "LP: " + this.conf.flexLP.ToString();
+                this.soloLadderLabel.Text = "Ladder: " + RankedUtils.rankToString(this.conf.soloRank);
+                this.soloLpLabel.Text = "LP: " + this.conf.soloLP.ToString();
+            }
+            this.Invalidate();
         }
 
         /*
@@ -98,74 +149,137 @@ namespace LeagueOfSmurfs
         {
             operationProcessBar.SetValue(0);
 
-            // Riot requests only with a validated API session + stored key
-            if (request && this.api != null && !string.IsNullOrWhiteSpace(this.confManager.apiKey)
-                && !string.IsNullOrWhiteSpace(this.conf.puuid))
+            if (request && !string.IsNullOrWhiteSpace(this.conf.puuid))
             {
-                try
-                {
-                    // Never Remove() before refresh — a failed API call used to delete the yaml permanently
-                    Task<Account> account = this.api.Account.GetAccountByPuuidAsync(RiotUtils.getAccountRegion(this.conf.region), this.conf.puuid);
-                    await account;
-                    operationProcessBar.SetValue(10);
-                    string riotId = account.Result.GameName + "#" + account.Result.TagLine;
-                    Debug.WriteLine("Success query account: " + riotId);
-
-                    SummonerLevelInfo summoner = await RiotUtils.GetSummonerByPuuidAsync(this.confManager.apiKey, this.conf.region, this.conf.puuid);
-                    if (summoner == null || string.IsNullOrWhiteSpace(summoner.Puuid))
-                        throw new Exception("Empty summoner response");
-
-                    operationProcessBar.SetValue(40);
-                    Debug.WriteLine("Success query name: " + riotId);
-
-                    this.conf.puuid = summoner.Puuid;
-                    this.conf.encryptedId = string.Empty;
-                    this.conf.summonerName = riotId;
-                    this.conf.level = summoner.Level;
-                    this.summonerError.Text = "";
-
-                    List<LeagueEntryInfo> entries = await RiotUtils.GetLeagueEntriesByPuuidAsync(this.confManager.apiKey, this.conf.region, summoner.Puuid);
-                    operationProcessBar.SetValue(80);
-
-                    this.conf.soloRank = RankEnum.UNRANKED;
-                    this.conf.flexRank = RankEnum.UNRANKED;
-                    foreach (LeagueEntryInfo entry in entries)
-                    {
-                        if (entry.QueueType.Equals("RANKED_FLEX_SR"))
-                        {
-                            this.conf.flexRank = RankedUtils.getRankByEntry(entry);
-                            this.conf.flexLP = entry.LeaguePoints;
-                        }
-                        if (entry.QueueType.Equals("RANKED_SOLO_5x5"))
-                        {
-                            this.conf.soloRank = RankedUtils.getRankByEntry(entry);
-                            this.conf.soloLP = entry.LeaguePoints;
-                        }
-                    }
-
-                    if (!this.confManager.UpdateAccount(this.conf))
-                        Debug.WriteLine("Failed to persist refreshed account");
-
-                    operationProcessBar.SetValue(100);
-                    await Task.Delay(1000);
-                    operationProcessBar.SetValue(0);
-                }
-                catch (Exception ex)
-                {
-                    Debug.WriteLine("Fail re-query name " + ex.Message);
-                    this.summonerError.Text = "Invalid Name";
-                    // Keep existing yaml / in-memory data intact
-                }
+                if (AppTheme.IsValorant)
+                    await RefreshValorantAsync();
+                else
+                    await RefreshLeagueAsync();
             }
 
-            // Always refresh UI from cached config (works without API key)
-            this.summonerNameLabel.Text = this.conf.summonerName;
-            this.regionLabel.Text = this.conf.region.ToString();
-            this.levelLabel.Text = "Level: " + this.conf.level;
-            this.flexLadderLabel.Text = "Ladder: " + RankedUtils.rankToString(this.conf.flexRank);
-            this.flexLpLabel.Text = "LP: " + this.conf.flexLP.ToString();
-            this.soloLadderLabel.Text = "Ladder: " + RankedUtils.rankToString(this.conf.soloRank);
-            this.soloLpLabel.Text = "LP: " + this.conf.soloLP.ToString();
+            ApplyModeLabels();
+        }
+
+        private async Task RefreshLeagueAsync()
+        {
+            if (this.api == null || string.IsNullOrWhiteSpace(this.confManager.apiKey))
+                return;
+
+            try
+            {
+                Task<Account> account = this.api.Account.GetAccountByPuuidAsync(RiotUtils.getAccountRegion(this.conf.region), this.conf.puuid);
+                await account;
+                operationProcessBar.SetValue(10);
+                string riotId = account.Result.GameName + "#" + account.Result.TagLine;
+                Debug.WriteLine("Success query account: " + riotId);
+
+                SummonerLevelInfo summoner = await RiotUtils.GetSummonerByPuuidAsync(this.confManager.apiKey, this.conf.region, this.conf.puuid);
+                if (summoner == null || string.IsNullOrWhiteSpace(summoner.Puuid))
+                    throw new Exception("Empty summoner response");
+
+                operationProcessBar.SetValue(40);
+                Debug.WriteLine("Success query name: " + riotId);
+
+                this.conf.puuid = summoner.Puuid;
+                this.conf.encryptedId = string.Empty;
+                this.conf.summonerName = riotId;
+                this.conf.level = summoner.Level;
+                this.summonerError.Text = "";
+
+                List<LeagueEntryInfo> entries = await RiotUtils.GetLeagueEntriesByPuuidAsync(this.confManager.apiKey, this.conf.region, summoner.Puuid);
+                operationProcessBar.SetValue(80);
+
+                this.conf.soloRank = RankEnum.UNRANKED;
+                this.conf.flexRank = RankEnum.UNRANKED;
+                foreach (LeagueEntryInfo entry in entries)
+                {
+                    if (entry.QueueType.Equals("RANKED_FLEX_SR"))
+                    {
+                        this.conf.flexRank = RankedUtils.getRankByEntry(entry);
+                        this.conf.flexLP = entry.LeaguePoints;
+                    }
+                    if (entry.QueueType.Equals("RANKED_SOLO_5x5"))
+                    {
+                        this.conf.soloRank = RankedUtils.getRankByEntry(entry);
+                        this.conf.soloLP = entry.LeaguePoints;
+                    }
+                }
+
+                if (!this.confManager.UpdateAccount(this.conf))
+                    Debug.WriteLine("Failed to persist refreshed account");
+
+                operationProcessBar.SetValue(100);
+                await Task.Delay(1000);
+                operationProcessBar.SetValue(0);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Fail re-query name " + ex.Message);
+                this.summonerError.Text = "Invalid Name";
+            }
+        }
+
+        private async Task RefreshValorantAsync()
+        {
+            if (string.IsNullOrWhiteSpace(this.confManager.valorantApiKey))
+                return;
+
+            try
+            {
+                ValorantMmrInfo mmr = await ValorantUtils.GetMmrByPuuidAsync(
+                    this.confManager.valorantApiKey, this.conf.region, this.conf.puuid);
+                operationProcessBar.SetValue(50);
+
+                if (mmr == null)
+                    throw new Exception("Empty MMR response");
+
+                if (!string.IsNullOrWhiteSpace(mmr.Name) && !string.IsNullOrWhiteSpace(mmr.Tag))
+                    this.conf.summonerName = mmr.Name + "#" + mmr.Tag;
+                if (!string.IsNullOrWhiteSpace(mmr.Puuid))
+                    this.conf.puuid = mmr.Puuid;
+
+                this.conf.valRank = RankedUtils.getValorantRankByTierId(mmr.CurrentTierId);
+                this.conf.valRR = mmr.RR;
+                this.conf.valPeakRank = RankedUtils.getValorantRankByTierId(mmr.PeakTierId);
+                this.summonerError.Text = "";
+
+                // Best-effort account level
+                try
+                {
+                    string name = this.conf.summonerName ?? string.Empty;
+                    string tag = string.Empty;
+                    int hash = name.IndexOf('#');
+                    if (hash >= 0)
+                    {
+                        tag = name.Substring(hash + 1);
+                        name = name.Substring(0, hash);
+                    }
+                    if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(tag))
+                    {
+                        ValorantAccountInfo account = await ValorantUtils.GetAccountByNameAsync(
+                            this.confManager.valorantApiKey, name, tag);
+                        if (account != null && account.Level > 0)
+                            this.conf.level = account.Level;
+                    }
+                }
+                catch (Exception levelEx)
+                {
+                    Debug.WriteLine("Valorant level fetch skipped: " + levelEx.Message);
+                }
+
+                operationProcessBar.SetValue(90);
+                if (!this.confManager.UpdateAccount(this.conf))
+                    Debug.WriteLine("Failed to persist refreshed valorant account");
+
+                operationProcessBar.SetValue(100);
+                await Task.Delay(1000);
+                operationProcessBar.SetValue(0);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Fail valorant re-query " + ex.Message);
+                this.summonerError.Text = "Invalid Name";
+            }
         }
 
         /*
@@ -274,27 +388,28 @@ namespace LeagueOfSmurfs
                 int waitMs = Math.Min(3000, Math.Max(0, (int)(deadline - DateTime.UtcNow).TotalMilliseconds));
                 if (waitMs > 0)
                     await Task.Delay(waitMs);
-                RiotUtils.launchLeague();
+                RiotUtils.launchCurrentGame();
                 operationProcessBar.SetValue(100);
                 completed = true;
 
                 // Stop focus loop once login sequence reached 100%
                 focusCts.Cancel();
 
-                // Wait for league to launch (bounded)
-                DateTime leagueDeadline = DateTime.UtcNow.AddSeconds(60);
-                Process[] league = null;
-                while (league == null || league.Length == 0)
+                // Wait for selected game to launch (bounded)
+                string gameProcess = RiotUtils.getGameProcessName();
+                DateTime gameDeadline = DateTime.UtcNow.AddSeconds(60);
+                Process[] game = null;
+                while (game == null || game.Length == 0)
                 {
-                    if (DateTime.UtcNow >= leagueDeadline)
+                    if (DateTime.UtcNow >= gameDeadline)
                     {
-                        Debug.WriteLine("League client wait timed out");
+                        Debug.WriteLine(gameProcess + " wait timed out");
                         break;
                     }
-                    league = Process.GetProcessesByName("LeagueClient");
+                    game = Process.GetProcessesByName(gameProcess);
                     await Task.Delay(100);
                 }
-                if (league != null && league.Length > 0)
+                if (game != null && game.Length > 0)
                 {
                     this.parent.WindowState = FormWindowState.Minimized;
                     this.inGame = true;
@@ -350,6 +465,32 @@ namespace LeagueOfSmurfs
             Color left, right;
             Point pointTop, pointBot;
 
+            if (AppTheme.IsValorant)
+            {
+                // Peak
+                right = RankedUtils.getValorantRankPen(this.conf.valPeakRank);
+                left = right;
+                pointTop = new Point(224, 70);
+                pointBot = new Point(440, 70);
+                pen = new Pen(new LinearGradientBrush(pointTop, pointBot, left, right), 3);
+                e.Graphics.DrawLine(pen, pointTop, pointBot);
+
+                // Current → Peak
+                left = RankedUtils.getValorantRankPen(this.conf.valRank);
+                pointTop = new Point(74, 70);
+                pointBot = new Point(255, 70);
+                pen = new Pen(new LinearGradientBrush(pointTop, pointBot, left, right), 3);
+                e.Graphics.DrawLine(pen, pointTop, pointBot);
+
+                // Account → Current
+                right = left;
+                left = AppTheme.Hover;
+                pointTop = new Point(10, 70);
+                pointBot = new Point(75, 70);
+                pen = new Pen(new LinearGradientBrush(pointTop, pointBot, left, right), 3);
+                e.Graphics.DrawLine(pen, pointTop, pointBot);
+                return;
+            }
 
             // Solo
             right = RankedUtils.getRankPen(this.conf.soloRank);
@@ -372,7 +513,7 @@ namespace LeagueOfSmurfs
 
             // Account to flex
             right = left;
-            left = Color.FromArgb(40, 40, 40);
+            left = AppTheme.Hover;
 
             pointTop = new Point(10, 70);
             pointBot = new Point(75, 70);
@@ -387,8 +528,8 @@ namespace LeagueOfSmurfs
             if (this.inGame && (DateTime.Now.Subtract(this.lastCheck).TotalSeconds > 5))
             {
                 this.lastCheck = DateTime.Now;
-                Process[] league = Process.GetProcessesByName("LeagueClient");
-                if (league == null || league.Length == 0)
+                Process[] game = Process.GetProcessesByName(RiotUtils.getGameProcessName());
+                if (game == null || game.Length == 0)
                 {
                     this.parent.WindowState = FormWindowState.Normal;
                     this.inGame = false;

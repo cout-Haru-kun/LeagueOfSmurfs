@@ -1,4 +1,5 @@
-﻿using LeagueOfSmurfs.Configurations;
+﻿using LeagueOfSmurfs.Configuration;
+using LeagueOfSmurfs.Configurations;
 using LeagueOfSmurfs.CustomForms;
 using LeagueOfSmurfs.Properties;
 using LeagueOfSmurfs.Utils;
@@ -21,9 +22,11 @@ namespace LeagueOfSmurfs
         private ConfigurationManager confManager;
         private List<AccountDisplay> accounts;
 
-        // Riot session
+        // Riot / Valorant sessions
         private RiotApi api;
+        private bool valorantApiValid;
         private bool apiKeyInitialized;
+        private bool apiKeyVisible;
 
 
         public MainMenu()
@@ -37,17 +40,86 @@ namespace LeagueOfSmurfs
             this.confManager = new ConfigurationManager();
             this.accounts = new List<AccountDisplay>();
             this.apiKeyInitialized = false;
+            this.valorantApiValid = false;
+            this.apiKeyVisible = false;
+            this.ApplyApiKeyVisibility();
 
             // Title bar
             this.titleBar = new TitleBar(this);
             this.titleBar.OnPaint(new PaintEventArgs(this.CreateGraphics(), this.ClientRectangle));
 
             // Update
+            this.LoadApiKeyIntoBox();
             this.checkAPI();
             this.updateDisplay();
+            this.ApplyTheme();
         }
 
 
+
+        /*
+         * ====================================================================================
+         *                              GAME MODE TOGGLE
+         * ====================================================================================
+        */
+
+        private void gameLeagueButton_Click(object sender, EventArgs e)
+        {
+            SetGameMode(GameMode.League);
+        }
+
+        private void gameValorantButton_Click(object sender, EventArgs e)
+        {
+            SetGameMode(GameMode.Valorant);
+        }
+
+        private void SetGameMode(GameMode mode)
+        {
+            if (AppTheme.Current == mode)
+                return;
+
+            PersistCurrentApiKeyFromBox();
+            AppTheme.SetMode(mode);
+            LoadApiKeyIntoBox();
+            ApplyTheme();
+            checkAPI();
+            foreach (AccountDisplay display in accounts)
+                display.ApplyModeLabels();
+            Invalidate(true);
+        }
+
+        public void ApplyTheme()
+        {
+            bool valorant = AppTheme.IsValorant;
+
+            this.BackColor = AppTheme.Window;
+            this.pictureBox2.BackColor = AppTheme.TitleBar;
+            this.icon.BackColor = AppTheme.TitleBar;
+            this.MinimizeButton.BackColor = AppTheme.TitleBar;
+            this.CloseButton.BackColor = AppTheme.TitleBar;
+
+            this.ButtonsPanel.BackColor = AppTheme.Panel;
+            this.AccountList.BackColor = AppTheme.PanelAlt;
+            this.innerAccountList.BackColor = AppTheme.PanelAlt;
+
+            this.apiKeyBox.BackColor = AppTheme.Input;
+            this.apiRefresh.BackColor = AppTheme.Panel;
+            this.apiKeyReveal.BackColor = AppTheme.Panel;
+            this.AddAccount.BackColor = AppTheme.Panel;
+            this.refreshAccount.BackColor = AppTheme.Panel;
+            this.apiStatus.BackColor = AppTheme.Window;
+
+            // Toggle visuals: active = accent, inactive = muted
+            this.gameLeagueButton.BackColor = valorant ? AppTheme.Input : AppTheme.Accent;
+            this.gameLeagueButton.ForeColor = valorant ? Color.White : Color.Black;
+            this.gameValorantButton.BackColor = valorant ? AppTheme.Accent : AppTheme.Input;
+            this.gameValorantButton.ForeColor = valorant ? Color.Black : Color.White;
+
+            foreach (AccountDisplay display in accounts)
+                display.ApplyTheme();
+
+            this.Invalidate();
+        }
 
         /*
          * ====================================================================================
@@ -55,29 +127,79 @@ namespace LeagueOfSmurfs
          * ====================================================================================
         */
 
-        private bool HasValidApi()
+        public bool HasValidApi()
         {
+            if (AppTheme.IsValorant)
+                return this.valorantApiValid && !string.IsNullOrWhiteSpace(this.confManager.valorantApiKey);
             return this.api != null && !string.IsNullOrWhiteSpace(this.confManager.apiKey);
         }
 
-        private void checkAPI()
+        public ConfigurationManager GetConfManager()
         {
-            this.api = null;
+            return this.confManager;
+        }
 
-            // First startup: restore the last saved key into the box
-            if (!this.apiKeyInitialized)
+        private void PersistCurrentApiKeyFromBox()
+        {
+            string candidate = (this.apiKeyBox.Text ?? string.Empty).Trim();
+            if (AppTheme.IsValorant)
             {
-                if (string.IsNullOrWhiteSpace(this.apiKeyBox.Text)
-                    && !string.IsNullOrWhiteSpace(this.confManager.apiKey))
-                {
-                    this.apiKeyBox.Text = this.confManager.apiKey.Trim();
-                }
-                this.apiKeyInitialized = true;
+                this.confManager.valorantApiKey = candidate;
+                if (string.IsNullOrWhiteSpace(candidate))
+                    this.confManager.ClearValorantApi();
+                else
+                    this.confManager.SaveValorantApi();
             }
+            else
+            {
+                this.confManager.apiKey = candidate;
+                if (string.IsNullOrWhiteSpace(candidate))
+                    this.confManager.ClearApi();
+                else
+                    this.confManager.SaveApi();
+            }
+        }
 
+        private void LoadApiKeyIntoBox()
+        {
+            if (AppTheme.IsValorant)
+                this.apiKeyBox.Text = this.confManager.valorantApiKey ?? string.Empty;
+            else
+                this.apiKeyBox.Text = this.confManager.apiKey ?? string.Empty;
+        }
+
+        private async void checkAPI()
+        {
             string candidate = (this.apiKeyBox.Text ?? string.Empty).Trim();
 
-            // Empty field = user intentionally clears the key
+            if (!this.apiKeyInitialized)
+                this.apiKeyInitialized = true;
+
+            if (AppTheme.IsValorant)
+            {
+                this.valorantApiValid = false;
+                if (string.IsNullOrWhiteSpace(candidate))
+                {
+                    this.confManager.ClearValorantApi();
+                    this.apiKeyBox.Text = string.Empty;
+                    this.apiColor();
+                    this.updateDisplay();
+                    return;
+                }
+
+                this.confManager.valorantApiKey = candidate;
+                this.confManager.SaveValorantApi();
+                this.apiKeyBox.Text = candidate;
+
+                Debug.WriteLine("Checking Valorant API Key");
+                this.valorantApiValid = await ValorantUtils.checkApiKeyAsync(candidate);
+                this.apiColor();
+                this.updateDisplay();
+                return;
+            }
+
+            this.api = null;
+
             if (string.IsNullOrWhiteSpace(candidate))
             {
                 this.confManager.ClearApi();
@@ -87,14 +209,12 @@ namespace LeagueOfSmurfs
                 return;
             }
 
-            // Always save what was entered (even if Riot validation fails temporarily)
             this.confManager.apiKey = candidate;
             this.confManager.SaveApi();
             this.apiKeyBox.Text = candidate;
 
-            Debug.WriteLine("Checking API Key: " + candidate);
+            Debug.WriteLine("Checking Riot API Key: " + candidate);
             this.api = RiotUtils.checkAPI(candidate);
-            // Keep saved key on invalid/offline — only clear when the field is emptied
 
             this.apiColor();
             this.updateDisplay();
@@ -111,6 +231,19 @@ namespace LeagueOfSmurfs
         private void apiRefresh_Click(object sender, EventArgs e)
         {
             this.checkAPI();
+        }
+
+        private void apiKeyReveal_Click(object sender, EventArgs e)
+        {
+            this.apiKeyVisible = !this.apiKeyVisible;
+            this.ApplyApiKeyVisibility();
+        }
+
+        private void ApplyApiKeyVisibility()
+        {
+            this.apiKeyBox.PasswordChar = this.apiKeyVisible ? '\0' : '*';
+            // Segoe MDL2 Assets: EyeReveal / Hide
+            this.apiKeyReveal.Text = this.apiKeyVisible ? "\uED1A" : "\uE7B3";
         }
 
         /*
@@ -152,6 +285,11 @@ namespace LeagueOfSmurfs
             }
             // Refresh and reloc
             this.RelocateDisplays();
+            foreach (AccountDisplay display in accounts)
+            {
+                display.ApplyTheme();
+                display.ApplyModeLabels();
+            }
         }
 
 

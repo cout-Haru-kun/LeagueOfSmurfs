@@ -84,7 +84,23 @@ namespace LeagueOfSmurfs.Utils
             applicationProcess.WaitForInputIdle();
             return (true);
         }
+
         public static bool launchLeague()
+        {
+            return launchProduct("league_of_legends");
+        }
+
+        public static bool launchValorant()
+        {
+            return launchProduct("valorant");
+        }
+
+        public static bool launchCurrentGame()
+        {
+            return AppTheme.IsValorant ? launchValorant() : launchLeague();
+        }
+
+        public static bool launchProduct(string product)
         {
             string ritoPath = getRiotPath();
 
@@ -93,9 +109,14 @@ namespace LeagueOfSmurfs.Utils
                 Debug.WriteLine("Can't find riot path");
                 return (false);
             }
-            Process applicationProcess = Process.Start(ritoPath, "--launch-product=league_of_legends --launch-patchline=live");
+            Process applicationProcess = Process.Start(ritoPath, "--launch-product=" + product + " --launch-patchline=live");
             applicationProcess.WaitForInputIdle();
             return (true);
+        }
+
+        public static string getGameProcessName()
+        {
+            return AppTheme.IsValorant ? "VALORANT-Win64-Shipping" : "LeagueClient";
         }
 
         public static void closeRiot()
@@ -110,12 +131,14 @@ namespace LeagueOfSmurfs.Utils
                 {
                     try { process.Kill(); } catch { /* ignore */ }
                 }
-                if (name.IndexOf("LeagueClient", StringComparison.OrdinalIgnoreCase) >= 0)
+                if (name.IndexOf("LeagueClient", StringComparison.OrdinalIgnoreCase) >= 0
+                    || name.IndexOf("VALORANT", StringComparison.OrdinalIgnoreCase) >= 0)
                 {
                     try { process.Kill(); } catch { /* ignore */ }
                 }
             }
         }
+
         public static RegionEnum getRegionByName(string name)
         {
             RegionEnum regionEnum = RegionEnum.EUW;

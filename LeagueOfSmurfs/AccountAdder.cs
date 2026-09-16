@@ -68,7 +68,80 @@ namespace LeagueOfSmurfs
 
             // Informations separator
             this.accountCheckPanel.Paint += Account_Paint;
+
+            this.ApplyTheme();
+            this.ApplyModeLabels();
         }
+
+        private void ApplyTheme()
+        {
+            this.BackColor = AppTheme.Window;
+            this.CloseButton.BackColor = AppTheme.TitleBar;
+            this.checkAccountButton.BackColor = AppTheme.Panel;
+            this.checkAccountButton.ForeColor = AppTheme.Accent;
+            this.confirmAdd.BackColor = AppTheme.Accent;
+            this.lightPanel1.BackColor = AppTheme.Panel;
+            this.lightPanel2.BackColor = AppTheme.Panel;
+            this.accountCheckPanel.BackColor = AppTheme.Panel;
+            this.riotNamePanel.BackColor = AppTheme.Panel;
+            this.regionBox.BackColor = AppTheme.Panel;
+
+            this.usernameBox.BackColor = AppTheme.Input;
+            this.passwordBox.BackColor = AppTheme.Input;
+            this.tagBox.BackColor = AppTheme.Input;
+            this.summonerNameBox.BackColor = AppTheme.Input;
+
+            Color secondary = AppTheme.SecondaryText;
+            this.username.ForeColor = secondary;
+            this.password.ForeColor = secondary;
+            this.riotName.ForeColor = secondary;
+            this.tagLabel.ForeColor = secondary;
+            this.summonerNameLabel.ForeColor = secondary;
+            this.levelLabel.ForeColor = secondary;
+            this.flexLadderLabel.ForeColor = secondary;
+            this.flexLpLabel.ForeColor = secondary;
+            this.soloLadderLabel.ForeColor = secondary;
+            this.soloLpLabel.ForeColor = secondary;
+
+            this.Invalidate(true);
+        }
+
+        private void ApplyModeLabels()
+        {
+            if (AppTheme.IsValorant)
+            {
+                this.summonerLabel.Text = "Agent";
+                this.flexLabel.Text = "Current";
+                this.soloLabel.Text = "Peak";
+            }
+            else
+            {
+                this.summonerLabel.Text = "Summoner";
+                this.flexLabel.Text = "Flex";
+                this.soloLabel.Text = "Solo/Duo";
+            }
+        }
+
+        private void RefreshPreviewLabels()
+        {
+            this.summonerNameLabel.Text = this.newAccount.summonerName;
+            this.levelLabel.Text = "Level: " + this.newAccount.level;
+            if (AppTheme.IsValorant)
+            {
+                this.flexLadderLabel.Text = "Rank: " + RankedUtils.valorantRankToString(this.newAccount.valRank);
+                this.flexLpLabel.Text = "RR: " + this.newAccount.valRR.ToString();
+                this.soloLadderLabel.Text = "Rank: " + RankedUtils.valorantRankToString(this.newAccount.valPeakRank);
+                this.soloLpLabel.Text = "";
+            }
+            else
+            {
+                this.soloLadderLabel.Text = "Ladder: " + RankedUtils.rankToString(this.newAccount.soloRank);
+                this.soloLpLabel.Text = "LP: " + this.newAccount.soloLP.ToString();
+                this.flexLadderLabel.Text = "Ladder: " + RankedUtils.rankToString(this.newAccount.flexRank);
+                this.flexLpLabel.Text = "LP: " + this.newAccount.flexLP.ToString();
+            }
+        }
+
         public AccountAdder(SmurfsConfiguration conf, Form parent, ConfigurationManager confManager, RiotApi api) : this(parent, confManager, api)
         {
             this.originalPuuid = conf.puuid;
@@ -80,6 +153,9 @@ namespace LeagueOfSmurfs
             this.newAccount.soloLP = conf.soloLP;
             this.newAccount.flexRank = conf.flexRank;
             this.newAccount.flexLP = conf.flexLP;
+            this.newAccount.valRank = conf.valRank;
+            this.newAccount.valRR = conf.valRR;
+            this.newAccount.valPeakRank = conf.valPeakRank;
             this.newAccount.region = conf.region;
             this.newAccount.username = conf.username;
             this.newAccount.password = conf.password;
@@ -109,14 +185,12 @@ namespace LeagueOfSmurfs
             }
 
             // Prefill UI from cache; optional re-check if API available
-            this.summonerNameLabel.Text = conf.summonerName;
-            this.levelLabel.Text = "Level: " + conf.level;
-            this.soloLadderLabel.Text = "Ladder: " + RankedUtils.rankToString(conf.soloRank);
-            this.soloLpLabel.Text = "LP: " + conf.soloLP.ToString();
-            this.flexLadderLabel.Text = "Ladder: " + RankedUtils.rankToString(conf.flexRank);
-            this.flexLpLabel.Text = "LP: " + conf.flexLP.ToString();
+            RefreshPreviewLabels();
 
-            if (this.api != null && !string.IsNullOrWhiteSpace(this.confManager.apiKey))
+            bool canCheck = AppTheme.IsValorant
+                ? !string.IsNullOrWhiteSpace(this.confManager.valorantApiKey)
+                : this.api != null && !string.IsNullOrWhiteSpace(this.confManager.apiKey);
+            if (canCheck)
                 checkAccountButton_Click(null, null);
         }
 
@@ -146,10 +220,23 @@ namespace LeagueOfSmurfs
 
             this.summonerNameLabel.Text = "";
             this.levelLabel.Text = "Level: 0";
-            this.flexLadderLabel.Text = "Ladder: Iron 4";
-            this.flexLpLabel.Text = "LP: 0";
-            this.soloLadderLabel.Text = "Ladder: Iron 4";
-            this.soloLpLabel.Text = "LP: 0";
+            if (AppTheme.IsValorant)
+            {
+                this.flexLadderLabel.Text = "Rank: unranked";
+                this.flexLpLabel.Text = "RR: 0";
+                this.soloLadderLabel.Text = "Rank: unranked";
+                this.soloLpLabel.Text = "";
+                this.newAccount.valRank = ValorantRankEnum.UNRANKED;
+                this.newAccount.valRR = 0;
+                this.newAccount.valPeakRank = ValorantRankEnum.UNRANKED;
+            }
+            else
+            {
+                this.flexLadderLabel.Text = "Ladder: Iron 4";
+                this.flexLpLabel.Text = "LP: 0";
+                this.soloLadderLabel.Text = "Ladder: Iron 4";
+                this.soloLpLabel.Text = "LP: 0";
+            }
         }
 
         private void tagBox_TextChanged(object sender, EventArgs e)
@@ -169,6 +256,12 @@ namespace LeagueOfSmurfs
 
         private async void checkAccountButton_Click(object sender, EventArgs e)
         {
+            if (AppTheme.IsValorant)
+            {
+                await CheckValorantAccountAsync();
+                return;
+            }
+
             if (this.api == null || string.IsNullOrWhiteSpace(this.confManager.apiKey))
             {
                 this.summonerError.Text = "No API key";
@@ -202,22 +295,16 @@ namespace LeagueOfSmurfs
 
                     Debug.WriteLine("Success query summoner: " + riotId + ", level: " + summoner.Level);
 
-                    // Set config info (summoner IDs removed from API — PUUID is the identifier)
                     this.newAccount.puuid = summoner.Puuid;
                     this.newAccount.encryptedId = string.Empty;
                     this.newAccount.summonerName = riotId;
                     this.newAccount.level = summoner.Level;
 
-                    // Set basic information
                     this.summonerError.Text = "";
                     this.summonerError.Visible = false;
-                    this.summonerNameLabel.Text = riotId;
-                    this.levelLabel.Text = "Level: " + summoner.Level;
 
-                    // Set ranked information (league-v4 by-puuid — by-summoner is obsolete)
                     List<LeagueEntryInfo> entries = await RiotUtils.GetLeagueEntriesByPuuidAsync(this.confManager.apiKey, this.newAccount.region, summoner.Puuid);
 
-                    // Set config info
                     this.newAccount.soloRank = RankEnum.UNRANKED;
                     this.newAccount.flexRank = RankEnum.UNRANKED;
                     foreach (LeagueEntryInfo entry in entries)
@@ -234,11 +321,7 @@ namespace LeagueOfSmurfs
                         }
                     }
 
-                    // Set basic information
-                    this.soloLadderLabel.Text = "Ladder: " + RankedUtils.rankToString(this.newAccount.soloRank);
-                    this.soloLpLabel.Text = "LP: " + this.newAccount.soloLP.ToString();
-                    this.flexLadderLabel.Text = "Ladder: " + RankedUtils.rankToString(this.newAccount.flexRank);
-                    this.flexLpLabel.Text = "LP: " + this.newAccount.flexLP.ToString();
+                    RefreshPreviewLabels();
                 }
                 catch (Exception ex)
                 {
@@ -246,6 +329,63 @@ namespace LeagueOfSmurfs
                     this.summonerError.Text = "Invalid Name";
                     this.summonerError.Visible = true;
                 }
+            }
+        }
+
+        private async Task CheckValorantAccountAsync()
+        {
+            if (string.IsNullOrWhiteSpace(this.confManager.valorantApiKey))
+            {
+                this.summonerError.Text = "No Valorant API key";
+                this.summonerError.Visible = true;
+                return;
+            }
+
+            if (this.summonerNameBox.Text == null || this.summonerNameBox.Text.Length < 3)
+                return;
+
+            if (string.IsNullOrWhiteSpace(this.tagBox.Text))
+            {
+                this.summonerError.Text = "Tag required";
+                this.summonerError.Visible = true;
+                return;
+            }
+
+            string name = this.summonerNameBox.Text.Trim();
+            string tag = this.tagBox.Text.Trim();
+
+            try
+            {
+                ValorantAccountInfo account = await ValorantUtils.GetAccountByNameAsync(
+                    this.confManager.valorantApiKey, name, tag);
+                if (account == null || string.IsNullOrWhiteSpace(account.Puuid))
+                    throw new Exception("Empty account response");
+
+                string riotId = account.Name + "#" + account.Tag;
+                Debug.WriteLine("Success Valorant account: " + riotId);
+
+                ValorantMmrInfo mmr = await ValorantUtils.GetMmrByNameAsync(
+                    this.confManager.valorantApiKey, this.newAccount.region, name, tag);
+                if (mmr == null)
+                    throw new Exception("Empty MMR response");
+
+                this.newAccount.puuid = account.Puuid;
+                this.newAccount.encryptedId = string.Empty;
+                this.newAccount.summonerName = riotId;
+                this.newAccount.level = account.Level;
+                this.newAccount.valRank = RankedUtils.getValorantRankByTierId(mmr.CurrentTierId);
+                this.newAccount.valRR = mmr.RR;
+                this.newAccount.valPeakRank = RankedUtils.getValorantRankByTierId(mmr.PeakTierId);
+
+                this.summonerError.Text = "";
+                this.summonerError.Visible = false;
+                RefreshPreviewLabels();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Fail Valorant query " + ex.Message);
+                this.summonerError.Text = "Invalid Name";
+                this.summonerError.Visible = true;
             }
         }
 
@@ -384,8 +524,8 @@ namespace LeagueOfSmurfs
 
         private void Account_Paint(object sender, PaintEventArgs e)
         {
-            e.Graphics.DrawLine(new Pen(Color.FromArgb(30, 30, 30), 3), new PointF(120F, 0F), new PointF(120F, 550F));
-            e.Graphics.DrawLine(new Pen(Color.FromArgb(30, 30, 30), 3), new PointF(255F, 0F), new PointF(255F, 550F));
+            e.Graphics.DrawLine(new Pen(AppTheme.Window, 3), new PointF(120F, 0F), new PointF(120F, 550F));
+            e.Graphics.DrawLine(new Pen(AppTheme.Window, 3), new PointF(255F, 0F), new PointF(255F, 550F));
         }
 
         private void passwordRepeat_Click(object sender, EventArgs e)

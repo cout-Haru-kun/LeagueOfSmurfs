@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using LeagueOfSmurfs.Configuration;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace LeagueOfSmurfs.CustomForms
@@ -18,19 +19,14 @@ namespace LeagueOfSmurfs.CustomForms
             this.parent = parentForm;
         }
 
-
-
-
         public void OnPaint(PaintEventArgs e)
         {
-            Brush brush = new SolidBrush(Color.FromArgb(40, 40, 40));
-            Rectangle rect = new Rectangle(0, 0, parent.Width, height);
-
-            // Draw bar
-            e.Graphics.FillRectangle(brush, rect);
+            using (Brush brush = new SolidBrush(AppTheme.TitleBar))
+            {
+                Rectangle rect = new Rectangle(0, 0, parent.Width, height);
+                e.Graphics.FillRectangle(brush, rect);
+            }
         }
-
-
 
         public void MouseDown(object sender, MouseEventArgs e)
         {

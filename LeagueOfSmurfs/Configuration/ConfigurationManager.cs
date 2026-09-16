@@ -13,11 +13,14 @@ namespace LeagueOfSmurfs.Configurations
     {
         private const string PasswordKey = "JulienSuçoteMoiMesPetitesBoursesVelues";
         private const string UsernameKey = "JeCiteElleJlaDetruitDansLesBuissons";
+        private const string RiotApiKeyEncryption = "LosRiotApiKeyVault_v1";
+        private const string ValorantApiKeyEncryption = "LosValorantApiKeyVault_v1";
 
         private readonly List<SmurfsConfiguration> accountsConfiguration;
         private readonly string dirPath;
 
         public string apiKey;
+        public string valorantApiKey;
 
         public ConfigurationManager()
         {
@@ -25,6 +28,7 @@ namespace LeagueOfSmurfs.Configurations
             this.dirPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), ".los");
             EnsureDirectory();
             LoadApi();
+            LoadValorantApi();
             Load();
         }
 
@@ -120,18 +124,32 @@ namespace LeagueOfSmurfs.Configurations
         public void LoadApi()
         {
             string path = Path.Combine(dirPath, "api.key");
-            if (File.Exists(path))
+            if (!File.Exists(path))
+                return;
+
+            string stored = (File.ReadAllText(path) ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(stored))
             {
-                apiKey = (File.ReadAllText(path) ?? string.Empty).Trim();
-                if (string.IsNullOrWhiteSpace(apiKey))
-                    apiKey = string.Empty;
+                apiKey = string.Empty;
+                return;
             }
+
+            apiKey = DecryptStoredSecret(stored, RiotApiKeyEncryption);
+            // Migrate plaintext keys to encrypted form
+            if (!string.IsNullOrEmpty(apiKey) && string.Equals(stored, apiKey, StringComparison.Ordinal))
+                SaveApi();
         }
 
         public void SaveApi()
         {
             EnsureDirectory();
-            File.WriteAllText(Path.Combine(dirPath, "api.key"), (this.apiKey ?? string.Empty).Trim());
+            string plain = (this.apiKey ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(plain))
+            {
+                ClearApi();
+                return;
+            }
+            File.WriteAllText(Path.Combine(dirPath, "api.key"), Encryption.Encrypt(plain, RiotApiKeyEncryption));
         }
 
         public void ClearApi()
@@ -140,6 +158,59 @@ namespace LeagueOfSmurfs.Configurations
             string path = Path.Combine(dirPath, "api.key");
             if (File.Exists(path))
                 File.Delete(path);
+        }
+
+        public void LoadValorantApi()
+        {
+            string path = Path.Combine(dirPath, "valorant.key");
+            if (!File.Exists(path))
+                return;
+
+            string stored = (File.ReadAllText(path) ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(stored))
+            {
+                valorantApiKey = string.Empty;
+                return;
+            }
+
+            valorantApiKey = DecryptStoredSecret(stored, ValorantApiKeyEncryption);
+            if (!string.IsNullOrEmpty(valorantApiKey) && string.Equals(stored, valorantApiKey, StringComparison.Ordinal))
+                SaveValorantApi();
+        }
+
+        public void SaveValorantApi()
+        {
+            EnsureDirectory();
+            string plain = (this.valorantApiKey ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(plain))
+            {
+                ClearValorantApi();
+                return;
+            }
+            File.WriteAllText(Path.Combine(dirPath, "valorant.key"), Encryption.Encrypt(plain, ValorantApiKeyEncryption));
+        }
+
+        public void ClearValorantApi()
+        {
+            valorantApiKey = string.Empty;
+            string path = Path.Combine(dirPath, "valorant.key");
+            if (File.Exists(path))
+                File.Delete(path);
+        }
+
+        private static string DecryptStoredSecret(string stored, string encryptionKey)
+        {
+            try
+            {
+                string decrypted = Encryption.Decrypt(stored, encryptionKey);
+                if (!string.IsNullOrWhiteSpace(decrypted))
+                    return decrypted.Trim();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("API key decrypt failed, treating as plaintext: " + ex.Message);
+            }
+            return stored;
         }
 
         public void Load()

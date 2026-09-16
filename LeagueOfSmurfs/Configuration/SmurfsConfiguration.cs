@@ -20,11 +20,16 @@ namespace LeagueOfSmurfs.Configurations
             region = RegionEnum.EUW;
             
 
-            // Ranked
+            // Ranked LoL
             flexRank = RankEnum.UNRANKED;
             flexLP = 0;
             soloRank = RankEnum.UNRANKED;
             soloLP = 0;
+
+            // Ranked Valorant
+            valRank = ValorantRankEnum.UNRANKED;
+            valRR = 0;
+            valPeakRank = ValorantRankEnum.UNRANKED;
         }
 
         public string puuid { get; set; }
@@ -42,11 +47,16 @@ namespace LeagueOfSmurfs.Configurations
         public long level { get; set; }
 
 
-        // Ranked
+        // Ranked LoL
         public RankEnum flexRank { get; set; }
         public int flexLP{ get; set; }
         public RankEnum soloRank { get; set; }
         public int soloLP { get; set; }
+
+        // Ranked Valorant (HenrikDev / competitive)
+        public ValorantRankEnum valRank { get; set; }
+        public int valRR { get; set; }
+        public ValorantRankEnum valPeakRank { get; set; }
 
     }
 }

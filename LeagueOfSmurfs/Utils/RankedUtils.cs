@@ -68,5 +68,54 @@ namespace LeagueOfSmurfs.Utils
             return pen;
         }
 
+        public static ValorantRankEnum getValorantRankByTierId(int tierId)
+        {
+            if (tierId <= 0)
+                return ValorantRankEnum.UNRANKED;
+            if (tierId > 25)
+                tierId = 25;
+
+            foreach (ValorantRankEnum rank in (ValorantRankEnum[])Enum.GetValues(typeof(ValorantRankEnum)))
+            {
+                if ((int)rank == tierId)
+                    return rank;
+            }
+            return ValorantRankEnum.UNRANKED;
+        }
+
+        public static string valorantRankToString(ValorantRankEnum rank)
+        {
+            if (rank == ValorantRankEnum.UNRANKED)
+                return "unranked";
+            if (rank == ValorantRankEnum.RADIANT)
+                return "radiant";
+
+            string text = rank.ToString().ToLowerInvariant().Replace('_', ' ');
+            return text;
+        }
+
+        public static Color getValorantRankPen(ValorantRankEnum rank)
+        {
+            int id = (int)rank;
+            if (id <= 0)
+                return Color.FromArgb(70, 70, 70);
+            if (id <= 3)
+                return Color.FromArgb(90, 85, 80);       // Iron
+            if (id <= 6)
+                return Color.FromArgb(140, 95, 60);      // Bronze
+            if (id <= 9)
+                return Color.FromArgb(170, 180, 190);    // Silver
+            if (id <= 12)
+                return Color.FromArgb(220, 180, 70);     // Gold
+            if (id <= 15)
+                return Color.FromArgb(60, 180, 170);     // Platinum
+            if (id <= 18)
+                return Color.FromArgb(100, 140, 230);    // Diamond
+            if (id <= 21)
+                return Color.FromArgb(70, 200, 120);     // Ascendant
+            if (id <= 24)
+                return Color.FromArgb(220, 70, 90);      // Immortal
+            return Color.FromArgb(255, 220, 90);         // Radiant
+        }
     }
 }

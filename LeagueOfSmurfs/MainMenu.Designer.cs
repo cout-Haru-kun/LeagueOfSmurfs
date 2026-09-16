@@ -40,6 +40,9 @@ namespace LeagueOfSmurfs
             this.AccountList = new LeagueOfSmurfs.CustomForms.LightPanel();
             this.innerAccountList = new LeagueOfSmurfs.CustomForms.LightPanel();
             this.ButtonsPanel = new LeagueOfSmurfs.CustomForms.LightPanel();
+            this.gameLeagueButton = new LeagueOfSmurfs.CustomForms.FlatButtonRaw();
+            this.gameValorantButton = new LeagueOfSmurfs.CustomForms.FlatButtonRaw();
+            this.apiKeyReveal = new LeagueOfSmurfs.CustomForms.FlatButtonRaw();
             this.apiRefresh = new LeagueOfSmurfs.CustomForms.FlatButton();
             this.apiKeyBox = new LeagueOfSmurfs.CustomForms.LightTextBox();
             this.apiStatus = new LeagueOfSmurfs.CustomForms.FlatButton();
@@ -106,6 +109,9 @@ namespace LeagueOfSmurfs
             // ButtonsPanel
             // 
             this.ButtonsPanel.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
+            this.ButtonsPanel.Controls.Add(this.gameLeagueButton);
+            this.ButtonsPanel.Controls.Add(this.gameValorantButton);
+            this.ButtonsPanel.Controls.Add(this.apiKeyReveal);
             this.ButtonsPanel.Controls.Add(this.apiRefresh);
             this.ButtonsPanel.Controls.Add(this.apiKeyBox);
             this.ButtonsPanel.Controls.Add(this.apiStatus);
@@ -115,6 +121,51 @@ namespace LeagueOfSmurfs
             this.ButtonsPanel.Name = "ButtonsPanel";
             this.ButtonsPanel.Size = new System.Drawing.Size(940, 50);
             this.ButtonsPanel.TabIndex = 2;
+            // 
+            // gameLeagueButton
+            // 
+            this.gameLeagueButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(187)))), ((int)(((byte)(134)))), ((int)(((byte)(252)))));
+            this.gameLeagueButton.FlatAppearance.BorderSize = 0;
+            this.gameLeagueButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.gameLeagueButton.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.gameLeagueButton.ForeColor = System.Drawing.Color.Black;
+            this.gameLeagueButton.Location = new System.Drawing.Point(12, 8);
+            this.gameLeagueButton.Name = "gameLeagueButton";
+            this.gameLeagueButton.Size = new System.Drawing.Size(34, 34);
+            this.gameLeagueButton.TabIndex = 7;
+            this.gameLeagueButton.Text = "L";
+            this.gameLeagueButton.UseVisualStyleBackColor = false;
+            this.gameLeagueButton.Click += new System.EventHandler(this.gameLeagueButton_Click);
+            // 
+            // gameValorantButton
+            // 
+            this.gameValorantButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.gameValorantButton.FlatAppearance.BorderSize = 0;
+            this.gameValorantButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.gameValorantButton.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
+            this.gameValorantButton.ForeColor = System.Drawing.Color.White;
+            this.gameValorantButton.Location = new System.Drawing.Point(52, 8);
+            this.gameValorantButton.Name = "gameValorantButton";
+            this.gameValorantButton.Size = new System.Drawing.Size(34, 34);
+            this.gameValorantButton.TabIndex = 8;
+            this.gameValorantButton.Text = "V";
+            this.gameValorantButton.UseVisualStyleBackColor = false;
+            this.gameValorantButton.Click += new System.EventHandler(this.gameValorantButton_Click);
+            // 
+            // apiKeyReveal
+            // 
+            this.apiKeyReveal.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
+            this.apiKeyReveal.FlatAppearance.BorderSize = 0;
+            this.apiKeyReveal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.apiKeyReveal.Font = new System.Drawing.Font("Segoe MDL2 Assets", 10F);
+            this.apiKeyReveal.ForeColor = System.Drawing.Color.White;
+            this.apiKeyReveal.Location = new System.Drawing.Point(662, 14);
+            this.apiKeyReveal.Name = "apiKeyReveal";
+            this.apiKeyReveal.Size = new System.Drawing.Size(20, 20);
+            this.apiKeyReveal.TabIndex = 9;
+            this.apiKeyReveal.Text = "\uE7B3";
+            this.apiKeyReveal.UseVisualStyleBackColor = false;
+            this.apiKeyReveal.Click += new System.EventHandler(this.apiKeyReveal_Click);
             // 
             // apiRefresh
             // 
@@ -139,6 +190,7 @@ namespace LeagueOfSmurfs
             this.apiKeyBox.Location = new System.Drawing.Point(324, 19);
             this.apiKeyBox.MaxLength = 128;
             this.apiKeyBox.Name = "apiKeyBox";
+            this.apiKeyBox.PasswordChar = '*';
             this.apiKeyBox.Size = new System.Drawing.Size(307, 13);
             this.apiKeyBox.TabIndex = 5;
             // 
@@ -264,6 +316,9 @@ namespace LeagueOfSmurfs
         private CustomForms.FlatButton apiStatus;
         private CustomForms.LightTextBox apiKeyBox;
         private CustomForms.FlatButton apiRefresh;
+        private CustomForms.FlatButtonRaw apiKeyReveal;
+        private CustomForms.FlatButtonRaw gameLeagueButton;
+        private CustomForms.FlatButtonRaw gameValorantButton;
     }
 }
 

@@ -1,0 +1,81 @@
+<UserControl x:Class="LeagueOfSmurfs.Views.AccountCard"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             SizeChanged="AccountCard_SizeChanged">
+    <Border x:Name="CardBorder"
+            Background="{DynamicResource Brush.Card}"
+            CornerRadius="{DynamicResource RadiusMedium}"
+            Padding="12,10,8,0">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Content + actions side by side (no rowspan stretch) -->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                    <TextBlock Style="{StaticResource SectionTitle}" Text="{Binding IdentityTitle}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0,4,0,0">
+                        <TextBlock Style="{StaticResource MutedText}" Text="{Binding RegionText}" VerticalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource MutedText}" Text=" · " VerticalAlignment="Center"/>
+                        <TextBlock Style="{StaticResource MutedText}" Text="{Binding DisplayName}" FontSize="11" Foreground="White" VerticalAlignment="Center"/>
+                    </StackPanel>
+                    <TextBlock Style="{StaticResource MutedText}" Text="{Binding LevelText}" Margin="0,2,0,0"/>
+
+                    <Grid Margin="0,10,0,6">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="16"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <StackPanel>
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="{Binding LeftTitle}"/>
+                            <TextBlock Style="{StaticResource MutedText}" Text="{Binding LeftRank}" Margin="0,4,0,0"/>
+                            <TextBlock Style="{StaticResource MutedText}" Text="{Binding LeftScore}" Margin="0,2,0,0"/>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2">
+                            <TextBlock Style="{StaticResource SectionTitle}" Text="{Binding RightTitle}"/>
+                            <TextBlock Style="{StaticResource MutedText}" Text="{Binding RightRank}" Margin="0,4,0,0"/>
+                            <TextBlock Style="{StaticResource MutedText}" Text="{Binding RightScore}" Margin="0,2,0,0"/>
+                        </StackPanel>
+                    </Grid>
+
+                    <ProgressBar Height="2" Margin="0,0,0,6"
+                                 Minimum="0" Maximum="100"
+                                 Value="{Binding Progress}"
+                                 Foreground="{DynamicResource Brush.Accent}"
+                                 Background="Transparent"
+                                 BorderThickness="0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1"
+                            Orientation="Vertical"
+                            HorizontalAlignment="Right"
+                            VerticalAlignment="Top">
+                    <Button Style="{StaticResource IconButton}" Command="{Binding EditCommand}" Width="28" Height="28" Margin="0,0,0,4" ToolTip="Edit">
+                        <Image Source="{Binding DataContext.EditImage, RelativeSource={RelativeSource AncestorType=Window}}" Width="14" Height="14"/>
+                    </Button>
+                    <Button Style="{StaticResource IconButton}" Command="{Binding DeleteCommand}" Width="28" Height="28" Margin="0,0,0,8" ToolTip="Delete">
+                        <Image Source="{Binding DataContext.DeleteImage, RelativeSource={RelativeSource AncestorType=Window}}" Width="14" Height="14"/>
+                    </Button>
+                    <Button Style="{StaticResource IconButton}" Command="{Binding LaunchCommand}" Width="34" Height="34" ToolTip="Launch">
+                        <Image Source="{Binding DataContext.PlayImage, RelativeSource={RelativeSource AncestorType=Window}}" Width="18" Height="18"/>
+                    </Button>
+                </StackPanel>
+            </Grid>
+
+            <!-- Footer gradient -->
+            <Border Grid.Row="1"
+                    Height="4"
+                    Margin="-12,0,-8,0"
+                    Background="{Binding RankBarBrush}"
+                    CornerRadius="0,0,12,12"/>
+        </Grid>
+    </Border>
+</UserControl>

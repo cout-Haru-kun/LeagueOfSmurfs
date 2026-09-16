@@ -1,0 +1,179 @@
+<Window x:Class="LeagueOfSmurfs.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:views="clr-namespace:LeagueOfSmurfs.Views"
+        Title="League of Smurfs"
+        Width="920" Height="640"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="CanMinimize"
+        WindowStartupLocation="CenterScreen"
+        Loaded="Window_Loaded">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis"/>
+    </Window.Resources>
+
+    <Border x:Name="RootBorder"
+            CornerRadius="24"
+            Background="{DynamicResource Brush.Window}"
+            ClipToBounds="True"
+            SizeChanged="RootBorder_SizeChanged">
+        <Border.RenderTransform>
+            <TranslateTransform x:Name="RootTranslate" Y="12"/>
+        </Border.RenderTransform>
+        <Grid>
+            <Image Source="{Binding BackgroundImage}" Stretch="UniformToFill" Opacity="0.35"/>
+            <Border Background="{DynamicResource Brush.Overlay}"/>
+
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="36"/>
+                    <RowDefinition Height="56"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Title bar -->
+                <Border Grid.Row="0"
+                        Background="{DynamicResource Brush.TitleBar}"
+                        CornerRadius="24,24,0,0"
+                        MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
+                    <Grid Margin="12,0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+                        <Image Source="{Binding LogoImage}" Width="24" Height="24" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding TitleText}"
+                                   FontFamily="Georgia"
+                                   FontSize="15"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource Brush.Accent}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                            <Button Style="{StaticResource IconButton}" Command="{Binding MinimizeCommand}" Width="28" Height="28" Margin="0,0,4,0">
+                                <Image Source="{Binding MinimizeImage}" Width="12" Height="12"/>
+                            </Button>
+                            <Button Style="{StaticResource IconButton}" Command="{Binding CloseCommand}" Width="28" Height="28">
+                                <Image Source="{Binding CloseImage}" Width="12" Height="12"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Toolbar -->
+                <Border Grid.Row="1" Background="{DynamicResource Brush.Panel}" Margin="16,8,16,0" CornerRadius="{DynamicResource RadiusMedium}"
+                        Padding="12,8" ClipToBounds="False">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <Border x:Name="ModeToggle"
+                                Width="68" Height="30"
+                                CornerRadius="15"
+                                Background="{DynamicResource Brush.Input}"
+                                VerticalAlignment="Center"
+                                Margin="4,0,0,0"
+                                MouseLeave="ModeToggle_MouseLeave">
+                            <Grid>
+                                <Border x:Name="ModeThumb"
+                                        Width="32" Height="26"
+                                        CornerRadius="13"
+                                        HorizontalAlignment="Left"
+                                        Margin="2,0,0,0"
+                                        VerticalAlignment="Center"
+                                        Background="#BB86FC">
+                                    <Border.RenderTransform>
+                                        <TranslateTransform x:Name="ModeThumbTranslate" X="0"/>
+                                    </Border.RenderTransform>
+                                </Border>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Border Background="Transparent" Cursor="Hand"
+                                            MouseEnter="ModeLeague_MouseEnter"
+                                            MouseLeftButtonUp="ModeLeague_Click">
+                                        <TextBlock Text="L" FontWeight="Bold" FontSize="12" Foreground="White"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <Border Grid.Column="1" Background="Transparent" Cursor="Hand"
+                                            MouseEnter="ModeValorant_MouseEnter"
+                                            MouseLeftButtonUp="ModeValorant_Click">
+                                        <TextBlock Text="V" FontWeight="Bold" FontSize="12" Foreground="White"
+                                                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                </Grid>
+                            </Grid>
+                        </Border>
+
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Image Source="{Binding ApiStatusImage}" Width="10" Height="10" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                            <PasswordBox x:Name="ApiPasswordBox" Width="220" MinHeight="32" Height="32"
+                                         Style="{StaticResource GhostPassword}"
+                                         PasswordChar="*"
+                                         VerticalContentAlignment="Center"
+                                         VerticalAlignment="Center"
+                                         PasswordChanged="ApiPasswordBox_PasswordChanged"/>
+                            <TextBox x:Name="ApiPlainBox" Width="220" MinHeight="32" Height="32"
+                                     Style="{StaticResource GhostField}"
+                                     Text="{Binding ApiKeyText, UpdateSourceTrigger=PropertyChanged}"
+                                     VerticalContentAlignment="Center"
+                                     VerticalAlignment="Center"
+                                     Visibility="Collapsed"/>
+                            <Button Style="{StaticResource IconButton}" Command="{Binding ValidateApiCommand}" Width="26" Height="26" Margin="6,0,0,0"
+                                    VerticalAlignment="Center" ToolTip="Validate API key">
+                                <Image Source="{Binding RefreshImage}" Width="13" Height="13"/>
+                            </Button>
+                            <Button Style="{StaticResource IconButton}" Command="{Binding ToggleRevealCommand}" Width="26" Height="26" Margin="2,0,0,0"
+                                    VerticalAlignment="Center"
+                                    FontFamily="Segoe MDL2 Assets" FontSize="11" Foreground="{DynamicResource Brush.Accent}"
+                                    Content="&#xE7B3;" ToolTip="Show / hide key"/>
+                        </StackPanel>
+
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,4,0">
+                            <Button Style="{StaticResource IconButton}" Command="{Binding AddAccountCommand}" Width="28" Height="28" Margin="0,0,4,0" ToolTip="Add account">
+                                <Image Source="{Binding AddImage}" Width="16" Height="16"/>
+                            </Button>
+                            <Button Style="{StaticResource IconButton}" Command="{Binding RefreshAccountsCommand}" Width="28" Height="28" ToolTip="Refresh accounts">
+                                <Image Source="{Binding RefreshImage}" Width="16" Height="16"/>
+                            </Button>
+                        </StackPanel>
+                    </Grid>
+                </Border>
+
+                <!-- Accounts -->
+                <Border Grid.Row="2" Margin="16" Background="{DynamicResource Brush.PanelAlt}" CornerRadius="{DynamicResource RadiusLarge}">
+                    <ScrollViewer x:Name="AccountsScrollViewer"
+                                  VerticalScrollBarVisibility="Hidden"
+                                  HorizontalScrollBarVisibility="Disabled"
+                                  Padding="10"
+                                  CanContentScroll="False"
+                                  PanningMode="VerticalOnly"
+                                  VerticalAlignment="Stretch"
+                                  PreviewMouseWheel="AccountsScrollViewer_PreviewMouseWheel">
+                        <ItemsControl ItemsSource="{Binding Accounts}" VerticalAlignment="Top">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <UniformGrid Columns="2" VerticalAlignment="Top"/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <views:AccountCard Margin="6" Opacity="0" VerticalAlignment="Top" Loaded="AccountCard_Loaded"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

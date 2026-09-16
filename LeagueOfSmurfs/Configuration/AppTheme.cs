@@ -24,7 +24,7 @@ namespace LeagueOfSmurfs.Configuration
 
         // Accents
         public static readonly Color LeagueAccent = Color.FromArgb(187, 134, 252);
-        public static readonly Color ValorantAccent = Color.FromArgb(0, 148, 255);
+        public static readonly Color ValorantAccent = Color.FromArgb(91, 164, 255); // #5BA4FF
 
         public static Color Accent
         {
@@ -39,7 +39,7 @@ namespace LeagueOfSmurfs.Configuration
             get
             {
                 return IsValorant
-                    ? Color.FromArgb(0, 100, 180)
+                    ? Color.FromArgb(59, 125, 216) // #3B7DD8
                     : Color.FromArgb(140, 90, 200);
             }
         }
@@ -50,7 +50,7 @@ namespace LeagueOfSmurfs.Configuration
             get
             {
                 return IsValorant
-                    ? Color.FromArgb(18, 28, 48)
+                    ? Color.FromArgb(10, 16, 28) // #0A101C
                     : Color.FromArgb(30, 30, 30);
             }
         }
@@ -60,7 +60,7 @@ namespace LeagueOfSmurfs.Configuration
             get
             {
                 return IsValorant
-                    ? Color.FromArgb(24, 40, 68)
+                    ? Color.FromArgb(17, 24, 39) // #111827
                     : Color.FromArgb(40, 40, 40);
             }
         }
@@ -70,7 +70,7 @@ namespace LeagueOfSmurfs.Configuration
             get
             {
                 return IsValorant
-                    ? Color.FromArgb(24, 40, 68)
+                    ? Color.FromArgb(19, 27, 44) // #131B2C
                     : Color.FromArgb(40, 40, 40);
             }
         }
@@ -80,7 +80,7 @@ namespace LeagueOfSmurfs.Configuration
             get
             {
                 return IsValorant
-                    ? Color.FromArgb(20, 34, 58)
+                    ? Color.FromArgb(16, 26, 44)
                     : Color.FromArgb(35, 35, 35);
             }
         }
@@ -90,7 +90,7 @@ namespace LeagueOfSmurfs.Configuration
             get
             {
                 return IsValorant
-                    ? Color.FromArgb(32, 52, 86)
+                    ? Color.FromArgb(27, 37, 56) // #1B2538
                     : Color.FromArgb(50, 50, 50);
             }
         }
@@ -100,7 +100,7 @@ namespace LeagueOfSmurfs.Configuration
             get
             {
                 return IsValorant
-                    ? Color.FromArgb(22, 36, 62)
+                    ? Color.FromArgb(22, 31, 51) // #161F33
                     : Color.FromArgb(40, 40, 40);
             }
         }
@@ -110,7 +110,7 @@ namespace LeagueOfSmurfs.Configuration
             get
             {
                 return IsValorant
-                    ? Color.FromArgb(28, 48, 80)
+                    ? Color.FromArgb(36, 49, 72) // #243148
                     : Color.FromArgb(40, 40, 40);
             }
         }
@@ -120,7 +120,7 @@ namespace LeagueOfSmurfs.Configuration
             get
             {
                 return IsValorant
-                    ? Color.FromArgb(140, 170, 210)
+                    ? Color.FromArgb(155, 180, 212) // #9BB4D4
                     : Color.FromArgb(80, 80, 80);
             }
         }

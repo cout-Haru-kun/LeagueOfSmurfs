@@ -10,7 +10,6 @@ namespace LeagueOfSmurfs.Utils
 
         public static RankEnum getRankByEntry(LeagueEntryInfo entry)
         {
-            RankEnum rankEnum = RankEnum.UNRANKED;
             string rankId = entry.Tier + "_" + entry.Rank;
             foreach (RankEnum rank in (RankEnum[])Enum.GetValues(typeof(RankEnum)))
             {

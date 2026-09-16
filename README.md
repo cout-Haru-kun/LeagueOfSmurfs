@@ -83,6 +83,8 @@ SHA256:
 463B7B36A2EFA2E90EC07D3196F3D29A5512EEE1FC11DF01DDD139E3BF7FC6A7
 ```
 
+[VirusTotal report](https://www.virustotal.com/gui/file/463b7b36a2efa2e90ec07d3196f3d29a5512eee1fc11df01ddd139e3bf7fc6a7) for this zip.
+
 PowerShell:
 
 ```powershell
@@ -116,6 +118,8 @@ That is **common** and usually a **false positive**, because the app does things
 - clipboard access
 - closing Riot / League / Valorant processes
 - **unsigned** executable downloaded from the internet
+
+Check the [VirusTotal scan for v2.0.0](https://www.virustotal.com/gui/file/463b7b36a2efa2e90ec07d3196f3d29a5512eee1fc11df01ddd139e3bf7fc6a7) before trusting a downloaded build.
 
 The source is public in this repository — prefer building from Visual Studio instead of downloading a prebuilt `.exe`.
 

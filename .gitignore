@@ -399,3 +399,6 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Local release packaging (zip / notes — attached to GitHub Releases, not the repo)
+dist/

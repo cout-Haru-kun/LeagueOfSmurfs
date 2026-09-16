@@ -304,6 +304,7 @@
     <Compile Include="Utils\MouseUtils.cs" />
     <Compile Include="Utils\RankedUtils.cs" />
     <Compile Include="Utils\RiotUtils.cs" />
+    <Compile Include="Utils\ThemeImages.cs" />
     <Compile Include="Utils\ValorantUtils.cs" />
     <Compile Include="Utils\WindowUtils.cs" />
     <EmbeddedResource Include="AccountAdder.resx">

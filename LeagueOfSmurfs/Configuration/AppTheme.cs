@@ -23,13 +23,14 @@ namespace LeagueOfSmurfs.Configuration
         }
 
         // Accents
+        public static readonly Color LeagueAccent = Color.FromArgb(187, 134, 252);
+        public static readonly Color ValorantAccent = Color.FromArgb(0, 148, 255);
+
         public static Color Accent
         {
             get
             {
-                return IsValorant
-                    ? Color.FromArgb(0, 148, 255)
-                    : Color.FromArgb(187, 134, 252);
+                return IsValorant ? ValorantAccent : LeagueAccent;
             }
         }
 

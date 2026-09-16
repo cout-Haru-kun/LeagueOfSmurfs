@@ -81,6 +81,10 @@ namespace LeagueOfSmurfs
             this.editButton.FlatAppearance.MouseOverBackColor = hover;
             this.deleteButton.FlatAppearance.MouseOverBackColor = hover;
 
+            this.launchButton.BackgroundImage = ThemeImages.Resolve("account.launch", this.launchButton.BackgroundImage);
+            this.editButton.BackgroundImage = ThemeImages.Resolve("account.edit", this.editButton.BackgroundImage);
+            this.deleteButton.BackgroundImage = ThemeImages.Resolve("account.delete", this.deleteButton.BackgroundImage);
+
             this.Invalidate();
         }
 

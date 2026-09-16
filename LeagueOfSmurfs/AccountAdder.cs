@@ -1,6 +1,7 @@
 ﻿using LeagueOfSmurfs.Configuration;
 using LeagueOfSmurfs.Configurations;
 using LeagueOfSmurfs.CustomForms;
+using LeagueOfSmurfs.Properties;
 using LeagueOfSmurfs.Utils;
 using RiotSharp;
 using RiotSharp.Endpoints.AccountEndpoint;
@@ -102,6 +103,8 @@ namespace LeagueOfSmurfs
             this.flexLpLabel.ForeColor = secondary;
             this.soloLadderLabel.ForeColor = secondary;
             this.soloLpLabel.ForeColor = secondary;
+
+            this.CloseButton.BackgroundImage = ThemeImages.Resolve("adder.close", Resources.close);
 
             this.Invalidate(true);
         }

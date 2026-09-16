@@ -72,9 +72,10 @@ namespace LeagueOfSmurfs
             // 
             this.icon.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(40)))), ((int)(((byte)(40)))), ((int)(((byte)(40)))));
             this.icon.BackgroundImage = global::LeagueOfSmurfs.Properties.Resources.LolSmurflogo;
-            this.icon.Location = new System.Drawing.Point(15, 0);
+            this.icon.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.icon.Location = new System.Drawing.Point(15, -2);
             this.icon.Name = "icon";
-            this.icon.Size = new System.Drawing.Size(30, 30);
+            this.icon.Size = new System.Drawing.Size(28, 28);
             this.icon.TabIndex = 5;
             this.icon.TabStop = false;
             // 
@@ -139,11 +140,11 @@ namespace LeagueOfSmurfs
             // 
             // gameValorantButton
             // 
-            this.gameValorantButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(50)))), ((int)(((byte)(50)))), ((int)(((byte)(50)))));
+            this.gameValorantButton.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(0)))), ((int)(((byte)(148)))), ((int)(((byte)(255)))));
             this.gameValorantButton.FlatAppearance.BorderSize = 0;
             this.gameValorantButton.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.gameValorantButton.Font = new System.Drawing.Font("Segoe UI", 12F, System.Drawing.FontStyle.Bold);
-            this.gameValorantButton.ForeColor = System.Drawing.Color.White;
+            this.gameValorantButton.ForeColor = System.Drawing.Color.Black;
             this.gameValorantButton.Location = new System.Drawing.Point(52, 8);
             this.gameValorantButton.Name = "gameValorantButton";
             this.gameValorantButton.Size = new System.Drawing.Size(34, 34);
@@ -158,7 +159,7 @@ namespace LeagueOfSmurfs
             this.apiKeyReveal.FlatAppearance.BorderSize = 0;
             this.apiKeyReveal.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.apiKeyReveal.Font = new System.Drawing.Font("Segoe MDL2 Assets", 10F);
-            this.apiKeyReveal.ForeColor = System.Drawing.Color.White;
+            this.apiKeyReveal.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(187)))), ((int)(((byte)(134)))), ((int)(((byte)(252)))));
             this.apiKeyReveal.Location = new System.Drawing.Point(662, 14);
             this.apiKeyReveal.Name = "apiKeyReveal";
             this.apiKeyReveal.Size = new System.Drawing.Size(20, 20);

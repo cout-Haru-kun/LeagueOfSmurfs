@@ -27,6 +27,8 @@ namespace LeagueOfSmurfs
         private bool valorantApiValid;
         private bool apiKeyInitialized;
         private bool apiKeyVisible;
+        private string validatedRiotKey;
+        private string validatedValorantKey;
 
 
         public MainMenu()
@@ -42,6 +44,8 @@ namespace LeagueOfSmurfs
             this.apiKeyInitialized = false;
             this.valorantApiValid = false;
             this.apiKeyVisible = false;
+            this.validatedRiotKey = null;
+            this.validatedValorantKey = null;
             this.ApplyApiKeyVisibility();
 
             // Title bar
@@ -82,16 +86,36 @@ namespace LeagueOfSmurfs
             AppTheme.SetMode(mode);
             LoadApiKeyIntoBox();
             ApplyTheme();
-            checkAPI();
+
+            // Don't re-hit Riot/HenrikDev on every L/V toggle if that mode's key was already validated
+            if (!IsCurrentModeApiAlreadyValidated())
+                checkAPI();
+            else
+                apiColor();
+
             foreach (AccountDisplay display in accounts)
                 display.ApplyModeLabels();
             Invalidate(true);
         }
 
+        private bool IsCurrentModeApiAlreadyValidated()
+        {
+            string candidate = (this.apiKeyBox.Text ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(candidate))
+                return false;
+
+            if (AppTheme.IsValorant)
+            {
+                return this.valorantApiValid
+                    && string.Equals(candidate, this.validatedValorantKey, StringComparison.Ordinal);
+            }
+
+            return this.api != null
+                && string.Equals(candidate, this.validatedRiotKey, StringComparison.Ordinal);
+        }
+
         public void ApplyTheme()
         {
-            bool valorant = AppTheme.IsValorant;
-
             this.BackColor = AppTheme.Window;
             this.pictureBox2.BackColor = AppTheme.TitleBar;
             this.icon.BackColor = AppTheme.TitleBar;
@@ -105,20 +129,35 @@ namespace LeagueOfSmurfs
             this.apiKeyBox.BackColor = AppTheme.Input;
             this.apiRefresh.BackColor = AppTheme.Panel;
             this.apiKeyReveal.BackColor = AppTheme.Panel;
+            this.apiKeyReveal.ForeColor = AppTheme.Accent;
             this.AddAccount.BackColor = AppTheme.Panel;
             this.refreshAccount.BackColor = AppTheme.Panel;
             this.apiStatus.BackColor = AppTheme.Window;
 
-            // Toggle visuals: active = accent, inactive = muted
-            this.gameLeagueButton.BackColor = valorant ? AppTheme.Input : AppTheme.Accent;
-            this.gameLeagueButton.ForeColor = valorant ? Color.White : Color.Black;
-            this.gameValorantButton.BackColor = valorant ? AppTheme.Accent : AppTheme.Input;
-            this.gameValorantButton.ForeColor = valorant ? Color.Black : Color.White;
+            // L / V keep brand colors regardless of active mode
+            this.gameLeagueButton.BackColor = AppTheme.LeagueAccent;
+            this.gameLeagueButton.ForeColor = Color.Black;
+            this.gameValorantButton.BackColor = AppTheme.ValorantAccent;
+            this.gameValorantButton.ForeColor = Color.Black;
+
+            ApplyThemedImages();
 
             foreach (AccountDisplay display in accounts)
                 display.ApplyTheme();
 
             this.Invalidate();
+        }
+
+        private void ApplyThemedImages()
+        {
+            this.pictureBox1.Image = ThemeImages.Resolve("main.bg", this.pictureBox1.Image);
+            this.pictureBox2.Image = ThemeImages.Resolve("main.title", Resources.title);
+            this.icon.BackgroundImage = ThemeImages.Resolve("main.logo", Resources.LolSmurflogo);
+            this.apiRefresh.BackgroundImage = ThemeImages.Resolve("main.apiRefresh", Resources.refresh);
+            this.AddAccount.BackgroundImage = ThemeImages.Resolve("main.add", Resources.add);
+            this.refreshAccount.BackgroundImage = ThemeImages.Resolve("main.refresh", Resources.refresh);
+            this.MinimizeButton.BackgroundImage = ThemeImages.Resolve("main.minimize", Resources.minimize);
+            this.CloseButton.BackgroundImage = ThemeImages.Resolve("main.close", Resources.close);
         }
 
         /*
@@ -178,6 +217,7 @@ namespace LeagueOfSmurfs
             if (AppTheme.IsValorant)
             {
                 this.valorantApiValid = false;
+                this.validatedValorantKey = null;
                 if (string.IsNullOrWhiteSpace(candidate))
                 {
                     this.confManager.ClearValorantApi();
@@ -193,12 +233,15 @@ namespace LeagueOfSmurfs
 
                 Debug.WriteLine("Checking Valorant API Key");
                 this.valorantApiValid = await ValorantUtils.checkApiKeyAsync(candidate);
+                if (this.valorantApiValid)
+                    this.validatedValorantKey = candidate;
                 this.apiColor();
                 this.updateDisplay();
                 return;
             }
 
             this.api = null;
+            this.validatedRiotKey = null;
 
             if (string.IsNullOrWhiteSpace(candidate))
             {
@@ -215,6 +258,8 @@ namespace LeagueOfSmurfs
 
             Debug.WriteLine("Checking Riot API Key: " + candidate);
             this.api = RiotUtils.checkAPI(candidate);
+            if (this.api != null)
+                this.validatedRiotKey = candidate;
 
             this.apiColor();
             this.updateDisplay();
